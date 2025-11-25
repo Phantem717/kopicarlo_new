@@ -2,7 +2,6 @@
 
 import HeaderCarlo from "@/components/HeaderCarlo";
 import React, { useEffect } from "react";
-
 const generateQR = async (text: string, elementId: string) => {
   const QRCode = (await import("qrcode")).default;
   const canvas = document.getElementById(elementId) as HTMLCanvasElement;

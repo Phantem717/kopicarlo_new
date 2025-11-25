@@ -2,7 +2,7 @@
 import ResponsesAPI from "@/app/api/carlo/responses";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
-import dynamic from "next/dynamic";
+import Swal from "sweetalert2";
 import { Button, Card, Tabs, message } from "antd";
 import { QrcodeOutlined, CameraOutlined } from "@ant-design/icons";
 
@@ -73,10 +73,23 @@ const QRCodePage = () => {
           
           // Stop scanning after successful scan
           newScanner.stop();
+          Swal.fire({
+            icon: "success",
+            title: "Berhasil Memindai Kode QR",
+            text: `Kode QR berhasil dipindai`,
+            timer: 3000,
+          })
           setActiveTab("result");
         },
         (errorMessage: string) => {
           // Handle scan failure
+          Swal.fire({
+            icon: "error",
+            title: "Gagal Memindai Kode QR",
+            text: errorMessage,
+                        timer: 3000,
+
+          })
           console.error(errorMessage);
         }
       );

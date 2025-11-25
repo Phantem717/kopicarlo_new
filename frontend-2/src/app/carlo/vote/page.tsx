@@ -1,4 +1,5 @@
 "use client";
+import Swal from "sweetalert2";
 
 import HeaderCarlo from "@/components/HeaderCarlo";
 import Image from "next/image";
@@ -147,7 +148,6 @@ const [posters, setPosters] = useState<Poster[]>([]);
 
 
   const router = useRouter();
-  const [postersState, setPostersState] = useState<Poster[]>([]);
   const [selectedPoster, setSelectedPoster] = useState<{
     id: number;
     title: string;
@@ -187,7 +187,17 @@ const [posters, setPosters] = useState<Poster[]>([]);
       if(response.success){
         if(response.data.authorized == true){
             const data = response.data;
-            router.push(`/carlo/${data.phone_number}-${data.otp}`);
+            Swal.fire({
+              icon: 'success',
+              title: 'Success',
+              text: 'Nomor Telepon Berhasil Di verifikasi',
+              showConfirmButton: true,
+              allowOutsideClick: false
+            }).then((result) => {
+              if (result.isConfirmed) {
+                router.push(`/carlo/${data.phone_number}-${data.otp}`);
+              }
+            })
         }
         else{
  const voting = await PosterAPI.updateVoting(selectedPoster.id);
@@ -198,7 +208,17 @@ const [posters, setPosters] = useState<Poster[]>([]);
         setExpiry(otp.data.otpExpiry);
 
         console.log("OTP RESP", otp);
-        setInputOtp(true);
+          Swal.fire({
+              icon: 'success',
+              title: 'Success',
+              text: 'Anda Berhasil Memilih Poster',
+              showConfirmButton: true,
+              allowOutsideClick: false
+            }).then((result) => {
+              if (result.isConfirmed) {
+                setInputOtp(true);
+              }
+            })
         }
        
       }
@@ -221,9 +241,33 @@ const [posters, setPosters] = useState<Poster[]>([]);
 
       if(response.success){
         console.log("OTP RESP", response);
-        
+         Swal.fire({
+              icon: 'success',
+              title: 'Success',
+              text: 'Anda Berhasil Memilih Verifikasi OTP',
+              showConfirmButton: true,
+              allowOutsideClick: false
+            }).then((result) => {
+              if (result.isConfirmed) {
         router.push(`/carlo/${phoneNumber}-${otp}`);
+              }
+            })
 
+      }
+      else{
+        Swal.fire({
+              icon: 'error',
+              title: 'Gagal Verifikasi OTP',
+              text: 'Apakah Ingin Kirim Ulang OTP Baru?',
+              showCancelButton: true,
+              confirmButtonText: "Save",
+              showConfirmButton: true,
+              allowOutsideClick: false
+            }).then((result) => {
+              if (result.isConfirmed) {
+                OTPAPI.sendOTP(phoneNumber);
+              }
+            })
       }
       
 
