@@ -83,13 +83,7 @@ const QRCodePage = () => {
         },
         (errorMessage: string) => {
           // Handle scan failure
-          Swal.fire({
-            icon: "error",
-            title: "Gagal Memindai Kode QR",
-            text: errorMessage,
-                        timer: 3000,
-
-          })
+  
           console.error(errorMessage);
         }
       );
@@ -97,7 +91,9 @@ const QRCodePage = () => {
       setScanner(newScanner);
     } catch (error) {
       console.error("Error starting scanner:", error);
+              
       message.error(
+        
         "Gagal memulai pemindai. Pastikan Anda mengizinkan akses kamera."
       );
     }
