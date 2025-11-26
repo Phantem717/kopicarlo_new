@@ -136,6 +136,8 @@ class ResponsesModel {
               COUNT(CASE WHEN success = 0 AND authorized = 1 THEN 1 END) AS total_authorized,
               COUNT(CASE WHEN success = 0 AND authorized = 0 THEN 1 END) AS total_not_authorized
           FROM responses
+          WHERE DATE(date_created) = CURDATE();
+
         `;
           const [rows] = await conn.query(query);
           console.log(rows);

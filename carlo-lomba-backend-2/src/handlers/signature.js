@@ -1,6 +1,7 @@
 const crypto = require('crypto-js');
 
 function generateSignature(consId, secretKey) {
+  console.log(consId,secretKey);
   // Dapatkan timestamp dalam detik
   const timestamp = Math.floor(Date.now() / 1000).toString();
   

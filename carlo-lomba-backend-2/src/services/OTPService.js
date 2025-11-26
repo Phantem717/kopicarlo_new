@@ -3,7 +3,7 @@ const  ResponsesModel = require('../models/responsesModel');
 const  generateSignature  = require('../handlers/signature');
 const PosterModel = require('../models/posterModel');
 const password = process.env.PASSWORD ;
-const consID2 = process.env.CONS_ID_WA;
+const consID2 = process.env.CONS_ID;
 const HOST = process.env.API_WA
 const path = `http://${HOST}/api/v1/integration/whatsappweb/hello/send-text`
 class OTPServiceClass {
@@ -16,7 +16,7 @@ class OTPServiceClass {
         console.log("DATA", data);
         const updateResp = await ResponsesModel.updateById(data.response_id, {choice:data.choice, phone_number:phone_number, success: data.success, otp: otp, authorized: data.authorized});
         if (updateResp) {
-            // this.sendOTP(phone_number,otp);
+            this.sendOTP(phone_number,otp);
             return {    
                 otp: otp,
                 otpExpiry: otpExpiry,
@@ -36,20 +36,24 @@ class OTPServiceClass {
    
         const url = path;
 
+        if(phone_number.startsWith("62")){
+            phone_number = `0${phone_number.slice(2)}`;
+        }
+
         const response = await axios.post(
         url,
         {
     phone: phone_number,        // phone: payload.phone_number,
             message : `*Notifikasi Sistem Otomatis*
-    *Jangan memberitahukan OTP ini kepada siapapun.*
+    Jangan memberitahukan OTP ini kepada siapapun.
 
     *Pemberitahuan OTP*
-    *OTP Anda: ${code}*
-    *OTP AKAN HANGUS DALAM 5 MENIT*
+    *Kode Verifikasi Anda: ${code}*
+    *Kode Verifikasi AKAN HANGUS DALAM 5 MENIT*
 
-    *Terimakasih telah menggunakan sistem kami.*
+    Terimakasih telah menggunakan sistem kami.
 
-    *_pesan otomatis dari sistem, mohon tidak membalas_*`    },
+    _pesan otomatis dari sistem, mohon tidak membalas_`    },
         {
         headers: {
             'X-cons-id': consID2,
@@ -60,7 +64,7 @@ class OTPServiceClass {
         }
     );
 
-    console.log("WA RESPONSE:", response.data);
+    // console.log("WA RESPONSE:", response.data);
     return response.data;
         } catch (error) {
             console.error('Error sending WhatsApp message Verification:', error.message);

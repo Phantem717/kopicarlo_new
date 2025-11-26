@@ -127,7 +127,7 @@ static async confirmPhoneNumber(req, res) {
       const totalResp = await ResponsesModel.countResponses();
       console.log("TOTAL",totalResp[0].total);
 
-      if(totalResp[0].total >= 18){
+      if(totalResp[0].total >= 400){
         return res.status(400).json({
           error: "Total Responses Exceeded",
           data: result,
