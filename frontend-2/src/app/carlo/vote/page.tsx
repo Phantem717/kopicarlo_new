@@ -258,6 +258,14 @@ const [posters, setPosters] = useState<Poster[]>([]);
       setOtp("");
 
       if(response.success){
+              if (!selectedPoster) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Poster belum dipilih.',
+        });
+        return;
+      }
                 const voting = await PosterAPI.updateVoting(selectedPoster.id);
         const updateChoice = await ResponsesAPI.update({phone_number: phoneNumber, choice: selectedPoster.id});
         console.log("Voting:", voting,updateChoice);
