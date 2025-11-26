@@ -252,64 +252,65 @@ const [posters, setPosters] = useState<Poster[]>([]);
     }
     
   };
+const handleSubmitOtp = async () => {
+  if (!otp) return;
 
-  const handleSubmitOtp =async  () => {
-    if (otp) {
-      console.log("OTP:", otp);
+  const response = await OTPAPI.checkOTP({
+    phone_number: phoneNumber,
+    otp: otp,
+    currentDate: new Date(),
+    expiry: new Date(),
+  });
 
-      const response = await OTPAPI.checkOTP({phone_number: phoneNumber, otp: otp, currentDate: new Date(), expiry: new Date()});
-      
-      console.log("OTP RESP", response);
+  console.log("OTP RESP", response);
 
-      setInputOtp(false);
-      setPhoneNumber("");
-      setOtp("");
-
-      if(response.success){
-              if (!selectedPoster) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'Poster belum dipilih.',
-        });
-        return;
-      }
-                const voting = await PosterAPI.updateVoting(selectedPoster.id);
-        const updateChoice = await ResponsesAPI.update({phone_number: phoneNumber, choice: selectedPoster.id});
-        console.log("Voting:", voting,updateChoice);
-        console.log("OTP RESP", response);
-         Swal.fire({
-              icon: 'success',
-              title: 'Success',
-              text: 'Anda Berhasil Memilih Verifikasi OTP',
-              showConfirmButton: true,
-              allowOutsideClick: false
-            }).then((result) => {
-              if (result.isConfirmed) {
-        router.push(`/carlo/${phoneNumber}-${otp}`);
-              }
-            })
-
-      }
-      else{
-        Swal.fire({
-              icon: 'error',
-              title: 'Gagal Verifikasi OTP',
-              text: 'Apakah Ingin Kirim Ulang OTP Baru?',
-              showCancelButton: true,
-              confirmButtonText: "Save",
-              showConfirmButton: true,
-              allowOutsideClick: false
-            }).then((result) => {
-              if (result.isConfirmed) {
-                OTPAPI.sendOTP(phoneNumber);
-              }
-            })
-      }
-      
-
+  if (response.success) {
+    if (!selectedPoster) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Poster belum dipilih.",
+      });
+      return;
     }
-  };
+
+    const voting = await PosterAPI.updateVoting(selectedPoster.id);
+    const updateChoice = await ResponsesAPI.update({
+      phone_number: phoneNumber,
+      choice: selectedPoster.id,
+    });
+
+    Swal.fire({
+      icon: "success",
+      title: "Success",
+      text: "Anda Berhasil Verifikasi OTP",
+      showConfirmButton: true,
+      allowOutsideClick: false,
+    }).then(() => {
+      router.push(`/carlo/${phoneNumber}-${otp}`);
+    });
+
+  } else {
+    // ❌ Do NOT reset phone number here
+    // ❌ Do NOT close phone modal
+
+    Swal.fire({
+      icon: "error",
+      title: "Gagal Verifikasi OTP",
+      text: "Apakah Ingin Kirim Ulang OTP Baru?",
+      showCancelButton: true,
+      confirmButtonText: "Kirim Ulang",
+      allowOutsideClick: false,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        OTPAPI.sendOTP(phoneNumber);
+      }
+    });
+  }
+
+  // Only clear OTP input, not phone number
+  setOtp("");
+};
 
   return (
     <>
