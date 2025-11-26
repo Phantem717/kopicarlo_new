@@ -2,10 +2,10 @@ import axios, { AxiosResponse } from "axios";
 
 const HOST = process.env.NEXT_PUBLIC_API_HOST;
 const PORT = process.env.NEXT_PUBLIC_API_PORT;
-
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 console.log(HOST, PORT);
 
-const BASE_URL = `http://${HOST}:${PORT}`;
+const BASE_URL = API_URL;
 
 interface OTPPayload {
 phone_number:string;
