@@ -1,9 +1,11 @@
 "use client";
 import Swal from "sweetalert2";
 import HeaderCarlo from "@/components/HeaderCarlo";
-import React, { useEffect } from "react";
+import React, { useEffect  } from "react";
 import { usePathname } from "next/navigation";
 import ResponsesAPI from "@/app/api/carlo/responses";
+import { useRouter } from "next/navigation";
+
 const generateQR = async (text: string, elementId: string) => {
   const QRCode = (await import("qrcode")).default;
   const canvas = document.getElementById(elementId) as HTMLCanvasElement;
@@ -25,6 +27,7 @@ export default function CarloCode({
   const { code } = React.use(params);
   const pathname = usePathname(); 
 const lastPart = pathname.split("/").pop(); 
+  const router = useRouter();
 
 const handleClick =async (decodedText: string) => {
   alert("QR Code Berhasil Dikirim");
@@ -43,16 +46,26 @@ const handleClick =async (decodedText: string) => {
   }, [code]);
 
   useEffect(() => {
+         let hasTriggered = false; // prevents repeating popup
   async function check() {
+ 
+    if (hasTriggered) return; // prevent double triggers
+
         const phone_number = lastPart!.split("-")[0];
 
     const resp = await ResponsesAPI.checkQR({phone_number, otp: lastPart!.split("-")[1]});
+       hasTriggered = true;  // lock
+        clearInterval(interval); // stop polling
+
     if (resp.data) {
       Swal.fire({
         icon: "success",
         title: "QR Anda Telah Dipindai",
         text: "Petugas sudah memverifikasi QR ini.",
-      });
+      }).then(() => {
+          // Redirect after popup closes
+                router.push(`/carlo`);
+        });;
     }
   }
 
