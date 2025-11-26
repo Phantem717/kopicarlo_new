@@ -348,7 +348,7 @@ const [posters, setPosters] = useState<Poster[]>([]);
                   </div>
                 </div>
                 <div className="p-4 flex flex-col flex-grow">
-                  <h3 className="text-lg font-semibold mb-2 text-gray-800">
+                  <h3 className="text-lg font-semibold mb-2 text-gray-800 uppercase">
                     {poster.title}
                   </h3>
                   <p className="text-gray-600 text-sm mb-4 flex-grow">
@@ -363,7 +363,7 @@ const [posters, setPosters] = useState<Poster[]>([]);
                           title: poster.title,
                         });
                       }}
-                      className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg transition-colors duration-200 text-sm font-medium"
+                      className=" w-full bg-blue-500 hover:bg-blue-600 text-white py-4 px-4 rounded-lg transition-colors duration-200 text-md font-bold"
                     >
                       Pilih Poster Ini
                     </button>
