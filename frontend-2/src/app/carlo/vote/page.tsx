@@ -363,7 +363,7 @@ const [posters, setPosters] = useState<Poster[]>([]);
                           title: poster.title,
                         });
                       }}
-                      className=" w-full bg-blue-500 hover:bg-blue-600 text-white py-3 px-4 rounded-lg transition-colors duration-200 text-xl font-bold"
+                      className=" w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg transition-colors duration-200 text-xl font-bold"
                     >
                       Pilih Poster Ini
                     </button>
