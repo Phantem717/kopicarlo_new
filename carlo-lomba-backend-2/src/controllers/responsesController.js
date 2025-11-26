@@ -123,14 +123,28 @@ static async confirmPhoneNumber(req, res) {
     const result = await ResponsesModel.readByPhoneNumber(phone_number);
     console.log("RESULT", result);
     if (!result) {
-      
-      // Not found → create new
-      const created = await ResponsesModel.create(phone_number);
+      const totalResp = await ResponsesModel.countResponses();
+      console.log("TOTAL",totalResp[0].total);
+
+      if(totalResp[0].total >= 18){
+        return res.status(400).json({
+          error: "Total Responses Exceeded",
+          data: result,
+          success: false,
+          message: "Total Responses Exceeded",
+        });
+      }
+
+      else{
+    const created = await ResponsesModel.create(phone_number);
       return res.status(200).json({
         data: created,
         success: true,
         message: "Phone number confirmed successfully",
       });
+      }
+      // Not found → create new
+  
     }
 
     else{

@@ -129,8 +129,14 @@ class ResponsesModel {
         const pool = await getDb();
         const conn = await pool.getConnection();
     try {
-          const query = 'SELECT COUNT(*) as TOTAL FROM responses';
-
+        const query = `
+          SELECT
+              COUNT(*) AS total,
+              COUNT(CASE WHEN success = 1 AND authorized = 1 THEN 1 END) AS total_success,
+              COUNT(CASE WHEN success = 0 AND authorized = 1 THEN 1 END) AS total_authorized,
+              COUNT(CASE WHEN success = 0 AND authorized = 0 THEN 1 END) AS total_not_authorized
+          FROM responses
+        `;
           const [rows] = await conn.query(query);
           console.log(rows);
     return rows;

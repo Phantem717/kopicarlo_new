@@ -182,14 +182,15 @@ const [posters, setPosters] = useState<Poster[]>([]);
 
 
   const handleSubmitVote = async () => {
-    if (phoneNumber && selectedPoster) {
+    try {
+      if (phoneNumber && selectedPoster) {
       // Here you can add phone number validation if needed
       console.log("Phone number:", phoneNumber);
       console.log("Selected poster:", selectedPoster);
 
       const response = await ResponsesAPI.confirmNumber(phoneNumber);
       console.log("Response:", response); 
-      if(response.success){
+      if(response.success == true){
         if(response.data.authorized == true){
             const data = response.data;
             Swal.fire({
@@ -205,9 +206,7 @@ const [posters, setPosters] = useState<Poster[]>([]);
             })
         }
         else{
- const voting = await PosterAPI.updateVoting(selectedPoster.id);
-        const updateChoice = await ResponsesAPI.update({phone_number: phoneNumber, choice: selectedPoster.id});
-        console.log("Voting:", voting,updateChoice);
+
 
         const otp = await OTPAPI.sendOTP(phoneNumber);
         setExpiry(otp.data.otpExpiry);
@@ -226,10 +225,24 @@ const [posters, setPosters] = useState<Poster[]>([]);
             })
         }
        
-      }
+      } 
 
 
     }
+    } catch (error: any) {
+        const backendMsg =
+    error.response?.data?.message ||
+    error.response?.data?.error ||
+    "Terjadi kesalahan tidak diketahui";
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: `${backendMsg}`,
+          showConfirmButton: true,
+          allowOutsideClick: false
+        })
+    }
+    
   };
 
   const handleSubmitOtp =async  () => {
@@ -245,6 +258,9 @@ const [posters, setPosters] = useState<Poster[]>([]);
       setOtp("");
 
       if(response.success){
+                const voting = await PosterAPI.updateVoting(selectedPoster.id);
+        const updateChoice = await ResponsesAPI.update({phone_number: phoneNumber, choice: selectedPoster.id});
+        console.log("Voting:", voting,updateChoice);
         console.log("OTP RESP", response);
          Swal.fire({
               icon: 'success',
