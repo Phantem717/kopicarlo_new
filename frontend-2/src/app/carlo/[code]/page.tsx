@@ -44,32 +44,36 @@ const handleClick =async (decodedText: string) => {
   useEffect(() => {
     generateQR(code, "qrcode");
   }, [code]);
+useEffect(() => {
+  let hasTriggered = false; 
+  let interval: any = null;
 
-  useEffect(() => {
-         let hasTriggered = false; // prevents repeating popup
   async function check() {
- 
-    if (hasTriggered) return; // prevent double triggers
+    if (hasTriggered) return;
 
-        const phone_number = lastPart!.split("-")[0];
+    const [phone_number, otp] = lastPart!.split("-");
 
-    const resp = await ResponsesAPI.checkQR({phone_number, otp: lastPart!.split("-")[1]});
-       hasTriggered = true;  // lock
-        clearInterval(interval); // stop polling
+    try {
+      const resp = await ResponsesAPI.checkQR({ phone_number, otp });
 
-    if (resp.data) {
-      Swal.fire({
-        icon: "success",
-        title: "QR Anda Telah Dipindai",
-        text: "Petugas sudah memverifikasi QR ini.",
-      }).then(() => {
-          // Redirect after popup closes
-                router.push(`/carlo`);
-        });;
+      if (resp?.data) {
+        hasTriggered = true; 
+        clearInterval(interval); 
+
+        Swal.fire({
+          icon: "success",
+          title: "QR Anda Telah Dipindai",
+          text: "Petugas sudah memverifikasi QR ini.",
+        }).then(() => {
+          router.push(`/carlo`);
+        });
+      }
+    } catch (error) {
+      console.error(error);
     }
   }
 
-  const interval = setInterval(check, 2000); // 2 seconds
+  interval = setInterval(check, 2000);
 
   return () => clearInterval(interval);
 }, []);
