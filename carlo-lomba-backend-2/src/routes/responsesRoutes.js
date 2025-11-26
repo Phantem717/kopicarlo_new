@@ -8,6 +8,7 @@ router.get('/count', ResponsesController.countAll);
 router.get('/phone/:phone_number', ResponsesController.readByPhoneNumber);
 router.post('/confirm', ResponsesController.confirmPhoneNumber);
 router.post('/confirm_qr', ResponsesController.confirmQR);
+router.post('/check_qr', ResponsesController.checkQR);
 // CRUD routes AFTER
 router.post('/', ResponsesController.create);
 router.get('/', ResponsesController.readAll);

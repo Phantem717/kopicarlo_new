@@ -44,7 +44,7 @@ const VoteModal = ({
           type="number"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder={mode === "phone" ? "ex. 08128231231" : "ex. 212314"}
+          placeholder={mode === "phone" ? "ex. 628128231231" : "ex. 212314"}
           className="w-full p-3 rounded-xl mb-6 bg-gray-50 border border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         />
         <div className="flex gap-4">
@@ -185,7 +185,16 @@ const [posters, setPosters] = useState<Poster[]>([]);
     try {
       if (phoneNumber && selectedPoster) {
       // Here you can add phone number validation if needed
-      console.log("Phone number:", phoneNumber);
+      if(!phoneNumber.startsWith("62")){
+        Swal.fire({
+          icon: 'warning',
+          title: 'Warning',
+          text: 'Nomor Telepon Harus Dimulai Dengan 62',
+        })
+        return;
+      }
+      else{
+          console.log("Phone number:", phoneNumber);
       console.log("Selected poster:", selectedPoster);
 
       const response = await ResponsesAPI.confirmNumber(phoneNumber);
@@ -226,8 +235,7 @@ const [posters, setPosters] = useState<Poster[]>([]);
         }
        
       } 
-
-
+      }
     }
     } catch (error: any) {
         const backendMsg =

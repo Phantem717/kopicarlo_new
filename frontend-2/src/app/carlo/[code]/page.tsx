@@ -1,5 +1,5 @@
 "use client";
-
+import Swal from "sweetalert2";
 import HeaderCarlo from "@/components/HeaderCarlo";
 import React, { useEffect } from "react";
 import { usePathname } from "next/navigation";
@@ -41,6 +41,26 @@ const handleClick =async (decodedText: string) => {
   useEffect(() => {
     generateQR(code, "qrcode");
   }, [code]);
+
+  useEffect(() => {
+  async function check() {
+        const phone_number = lastPart!.split("-")[0];
+
+    const resp = await ResponsesAPI.checkQR({phone_number, otp: lastPart!.split("-")[1]});
+    if (resp.data) {
+      Swal.fire({
+        icon: "success",
+        title: "QR Anda Telah Dipindai",
+        text: "Petugas sudah memverifikasi QR ini.",
+      });
+    }
+  }
+
+  const interval = setInterval(check, 2000); // 2 seconds
+
+  return () => clearInterval(interval);
+}, []);
+
   return (
     <div>
       <HeaderCarlo />

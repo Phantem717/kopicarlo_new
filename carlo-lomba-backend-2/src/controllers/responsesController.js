@@ -120,6 +120,7 @@ static async confirmPhoneNumber(req, res) {
   try {
     const {phone_number} = req.body; //phone_number = req.body;
     console.log("Phone number:", phone_number);
+  
     const result = await ResponsesModel.readByPhoneNumber(phone_number);
     console.log("RESULT", result);
     if (!result) {
@@ -195,7 +196,8 @@ static async confirmQR(req,res){
 
     const result = await ResponsesModel.readByPhoneNumber(payload.phone_number);
     console.log("RESULT", result,payload);
-    if(result.otp === payload.otp){
+    if(!result.success){
+ if(result.otp === payload.otp){
              const new_payload = {
         choice: result.choice,
         phone_number:  payload.phone_number,
@@ -220,11 +222,42 @@ static async confirmQR(req,res){
         message: "QR Invalid",
       });
     }
+    } else{
+      return res.status(401).json({
+        data: result,
+        success: false,
+        message: "QR Already Used",
+      });
+    }
+   
 } catch(error){
   console.error("Error confirming QR:", error);
   res.status(500).json({success: false, message: "Internal Server Error" });
 }
 
+
+
+}
+
+static async checkQR(req,res){
+try {
+    const payload = req.body; //phone_number = req.body;
+
+    const result = await ResponsesModel.readByPhoneNumber(payload.phone_number);
+    console.log("RESULT", result,payload);
+
+      return res.status(200).json({
+        data: result.success,
+        success: true,
+        message: "QR confirmed successfully",
+      });
+    
+
+   
+} catch(error){
+  console.error("Error confirming QR:", error);
+  res.status(500).json({success: false, message: "Internal Server Error" });
+}
 
 
 }

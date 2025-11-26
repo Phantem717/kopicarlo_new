@@ -63,6 +63,19 @@ confirmQR: async (payload:qrPayload): Promise<responseResult> => {
   }
 },
 
+checkQR: async (payload:qrPayload): Promise<responseResult> => {
+  try {
+    const response: AxiosResponse<responseResult> = await axios.post(
+      `${BASE_URL}/api/responses/check_QR`, payload 
+    );
+
+    return response.data; // now TS knows it's an array
+  } catch (error) {
+    console.error("Error fetching posters:", error);
+    throw error;
+  }
+},
+
 };
 
 export default ResponsesAPI;
