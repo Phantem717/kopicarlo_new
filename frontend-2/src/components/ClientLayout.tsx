@@ -1,7 +1,6 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import { Geist, Geist_Mono } from "next/font/google";
 
@@ -46,7 +45,6 @@ export default function ClientLayout({
       <main className={`flex-1 flex flex-col ${!hideLayout && "mt-8"}`}>
         {children}
       </main>
-      {<Footer />}
     </div>
   );
 }

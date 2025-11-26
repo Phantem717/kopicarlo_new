@@ -6,35 +6,54 @@ import { Button, Modal, Input, Table, message, Card } from "antd";
 import { Html5Qrcode } from "html5-qrcode";
 import { useRouter } from "next/navigation";
 
-// Dummy data for votes
-const dummyVotes = [
-  { id: 1, title: "Vote 1", description: "Deskripsi vote 1", status: "active" },
-  {
-    id: 2,
-    title: "Vote 2",
-    description: "Deskripsi vote 2",
-    status: "completed",
-  },
-  {
-    id: 3,
-    title: "Vote 3",
-    description: "Deskripsi vote 3",
-    status: "upcoming",
-  },
-];
-
+// // Dummy data for votes
+// const dummyVotes = [
+//   { id: 1, title: "Vote 1", description: "Deskripsi vote 1", status: "active" },
+//   {
+//     id: 2,
+//     title: "Vote 2",
+//     description: "Deskripsi vote 2",
+//     status: "completed",
+//   },
+//   {
+//     id: 3,
+//     title: "Vote 3",
+//     description: "Deskripsi vote 3",
+//     status: "upcoming",
+//   },
+// ];
+import PosterAPI from "@/app/api/carlo/posters";
 export default function VoteListPage() {
+    const router = useRouter();
+
   const [password, setPassword] = useState("");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [scanner, setScanner] = useState<Html5Qrcode | null>(null);
-  const router = useRouter();
+  type Poster = {
+    id: number;
+    title: string;
+    imageUrl: string;
+    description: string;
+    votes: number;
+  };
 
+  const [posters, setPosters] = useState<Poster[]>([]);
+
+
+  const handleGetData = async () =>{
+    const response = await PosterAPI.getPosters();
+    console.log("RESP",response)
+    setPosters(response);
+  }
   // Check if user is already authenticated
   useEffect(() => {
     const auth = localStorage.getItem("voteAuth");
     if (auth === "authenticated") {
+            handleGetData();
       setIsAuthenticated(true);
+
+
     }
   }, []);
 
@@ -121,9 +140,9 @@ export default function VoteListPage() {
       key: "description",
     },
     {
-      title: "Status",
-      dataIndex: "status",
-      key: "status",
+      title: "Total Votes",
+      dataIndex: "votes",
+      key: "votes",
       render: (status: string) => {
         const statusMap: Record<string, string> = {
           active: "Aktif",
@@ -170,13 +189,13 @@ export default function VoteListPage() {
     <div className="p-4">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Daftar Voting</h1>
-        <Button type="primary" icon={<QrcodeOutlined />} onClick={startScanner}>
+        <Button type="primary" icon={<QrcodeOutlined />} onClick={() => router.push("/carlo/qr")}>
           Scan QR Code
         </Button>
       </div>
 
       <Table
-        dataSource={dummyVotes}
+        dataSource={posters}
         columns={columns}
         rowKey="id"
         pagination={false}

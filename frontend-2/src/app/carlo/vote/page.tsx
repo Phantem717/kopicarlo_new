@@ -15,6 +15,7 @@ const VoteModal = ({
   posterTitle,
   onSubmit,
   input,
+  mode,
   setInput,
 }: {
   isOpen: boolean;
@@ -23,6 +24,7 @@ const VoteModal = ({
   onSubmit: () => void;
   input: string;
   setInput: (value: string) => void;
+  mode: string;
 }) => {
 
   
@@ -34,13 +36,15 @@ const VoteModal = ({
           Anda memilih {posterTitle}
         </h2>
         <p className="text-gray-600 mb-6">
-          Silakan masukkan nomor telepon Anda
-        </p>
+  {mode === "phone" 
+    ? "Silakan masukkan nomor telepon Anda" 
+    : "Silakan masukkan kode OTP yang telah dikirim"}
+</p>        
         <input
           type="number"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Contoh: 081234567890"
+          placeholder={mode === "phone" ? "ex. 08128231231" : "ex. 212314"}
           className="w-full p-3 rounded-xl mb-6 bg-gray-50 border border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         />
         <div className="flex gap-4">
@@ -75,6 +79,7 @@ const ImageModal = ({
   onClose,
   imageUrl,
   title,
+  
 }: {
   isOpen: boolean;
   onClose: () => void;
@@ -330,9 +335,7 @@ const [posters, setPosters] = useState<Poster[]>([]);
                     >
                       Pilih Poster Ini
                     </button>
-                    <span className="text-sm font-medium text-gray-700">
-                      {poster.votes} Suara
-                    </span>
+        
                   </div>
                 </div>
               </div>
@@ -348,6 +351,7 @@ const [posters, setPosters] = useState<Poster[]>([]);
         onSubmit={handleSubmitVote}
         input={phoneNumber}
         setInput={setPhoneNumber}
+        mode="phone"
       />
 
       <VoteModal
@@ -357,6 +361,8 @@ const [posters, setPosters] = useState<Poster[]>([]);
         onSubmit={handleSubmitOtp}
         input={otp}
         setInput={setOtp}
+                mode="otp"
+
       />
 
       <ImageModal
