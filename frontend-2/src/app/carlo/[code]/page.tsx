@@ -2,6 +2,8 @@
 
 import HeaderCarlo from "@/components/HeaderCarlo";
 import React, { useEffect } from "react";
+import { usePathname } from "next/navigation";
+import ResponsesAPI from "@/app/api/carlo/responses";
 const generateQR = async (text: string, elementId: string) => {
   const QRCode = (await import("qrcode")).default;
   const canvas = document.getElementById(elementId) as HTMLCanvasElement;
@@ -11,6 +13,9 @@ const generateQR = async (text: string, elementId: string) => {
     });
   }
 };
+// "/carlo/084567124657-752302"
+
+
 
 export default function CarloCode({
   params,
@@ -18,6 +23,21 @@ export default function CarloCode({
   params: Promise<{ code: string }>;
 }) {
   const { code } = React.use(params);
+  const pathname = usePathname(); 
+const lastPart = pathname.split("/").pop(); 
+
+const handleClick =async (decodedText: string) => {
+  alert("QR Code Berhasil Dikirim");
+  const qrCode = decodedText.split("-")[1] 
+    const phone_number =  decodedText.split("-")[0];
+    const payload = {
+      phone_number: phone_number,
+      otp: qrCode
+    }
+    console.log(payload,qrCode,phone_number,decodedText);
+    const resp = await ResponsesAPI.confirmQR(payload);
+    console.log(resp);
+};
   useEffect(() => {
     generateQR(code, "qrcode");
   }, [code]);
@@ -34,9 +54,19 @@ export default function CarloCode({
           </p>
           <div className="flex justify-center">
             <canvas id="qrcode" />
+            
           </div>
+            <button
+            onClick={() => handleClick(lastPart!)}
+            className={`flex-1 py-3 px-4 w-full rounded-xl mt-4 transition-colors ${
+                "bg-blue-500 hover:bg-blue-600 text-white"
+            }`}
+          >
+            Redeem
+          </button> 
         </div>
-      </div>
+
+     </div>
     </div>
   );
 }
