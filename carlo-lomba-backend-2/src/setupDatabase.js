@@ -19,10 +19,13 @@ const queries = [
     response_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     choice integer,
     phone_number VARCHAR(255),
+    name VARCHAR(255),
+    role VARCHAR(255),
     success BOOLEAN DEFAULT 0,
     authorized BOOLEAN DEFAULT 0,
     otp varchar(255),
-    date_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    date_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    expiry_date TIMESTAMP
   );`,
 
 ];

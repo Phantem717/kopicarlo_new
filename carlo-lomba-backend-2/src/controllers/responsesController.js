@@ -59,7 +59,11 @@ class ResponsesController {
         phone_number: data.phone_number ?? updating.phone_number,
         success: data.success ?? updating.success,
         otp: data.otp ?? updating.otp,
-        authorized: data.authorized ?? updating.authorized
+        authorized: data.authorized ?? updating.authorized,
+        expiry_date: data.expiry_date ?? updating.expiry_date,
+        name: data.name ?? updating.name,
+        role: data.role ?? updating.role,
+        unit: data.unit ?? updating.unit
       }
       const result = await ResponsesModel.updateById(id, payload);
       res.status(200).json({message: 'Response updated successfully', data: result});
@@ -85,6 +89,10 @@ class ResponsesController {
         success: data.success ?? updating.success,
         otp: data.otp ?? updating.otp,
         authorized: data.authorized ?? updating.authorized,
+        expiry_date: data.expiry_date ?? updating.expiry_date,
+        name: data.name ?? updating.name,
+        role: data.role ?? updating.role,
+        unit: data.unit ?? updating.unit
        
       }
       const result = await ResponsesModel.updateByNumber(payload);
@@ -118,7 +126,7 @@ class ResponsesController {
   }
 static async confirmPhoneNumber(req, res) {
   try {
-    const {phone_number} = req.body; //phone_number = req.body;
+    const {phone_number,name,role,unit} = req.body; //phone_number = req.body;
     console.log("Phone number:", phone_number);
   
     const result = await ResponsesModel.readByPhoneNumber(phone_number);
@@ -137,7 +145,7 @@ static async confirmPhoneNumber(req, res) {
       }
 
       else{
-    const created = await ResponsesModel.create(phone_number);
+    const created = await ResponsesModel.create(phone_number,name,role,unit);
       return res.status(200).json({
         data: created,
         success: true,
@@ -204,6 +212,10 @@ static async confirmQR(req,res){
         success: true,
         otp: payload.otp,
         authorized:  result.authorized,
+        expiry_date: result.expiry_date,
+        name: result.name,
+        role: result.role,
+        unit: result.unit
        
       }
           const update = await ResponsesModel.updateByNumber(new_payload);

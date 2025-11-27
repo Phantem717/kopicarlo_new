@@ -28,7 +28,7 @@ interface qrPayload {
 }
 const ResponsesAPI = {
   // Create new API Response
-confirmNumber: async (phone_number:string): Promise<responseResult> => {
+confirmNumber: async (phone_number:string,name:string,role:string,unit:string): Promise<responseResult> => {
   try {
       const { timestamp, signature } = generateSignature(CONS_ID, API_KEY);
         
@@ -39,7 +39,7 @@ confirmNumber: async (phone_number:string): Promise<responseResult> => {
                 "x-signature": signature,
               };
     const response: AxiosResponse<responseResult> = await axios.post(
-      `${BASE_URL}/api/responses/confirm`, {phone_number} , {headers}
+      `${BASE_URL}/api/responses/confirm`, {phone_number,name,role,unit} , {headers}
     );
 
     return response.data; // now TS knows it's an array

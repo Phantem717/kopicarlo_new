@@ -1,12 +1,12 @@
 const { getDb } = require('../config/db');
 
 class ResponsesModel {
-  static async create(phone_number) {
+  static async create(phone_number,name,role,unit) {
     const pool = await getDb();
     const conn = await pool.getConnection();
     try {
-          const query = 'INSERT INTO responses (phone_number) VALUES (?)';
-    const [result] = await conn.query(query, [phone_number]);
+          const query = 'INSERT INTO responses (phone_number, name, role,unit) VALUES (?,?,?,?)';
+    const [result] = await conn.query(query, [phone_number,name,role,unit]);
     return result;
     } catch (error) {
       throw error
@@ -82,13 +82,17 @@ class ResponsesModel {
 
   static async updateById(id, data) {
     const conn = await getDb();
-    const query = 'UPDATE responses SET choice = ?, phone_number = ?, success = ?, otp = ?, authorized=? WHERE response_id = ?';
+    const query = 'UPDATE responses SET choice = ?, phone_number = ?, success = ?, otp = ?, authorized=?,expiry_date=?, name=?, role=?, unit=?  WHERE response_id = ?';
     const [result] = await conn.query(query, [
       data.choice,
       data.phone_number,
       data.success,
       data.otp,
       data.authorized,
+      data.expiry_date,
+      data.name,
+      data.role,
+      data.unit,
       id,
     ]);
     return result.affectedRows === 1;

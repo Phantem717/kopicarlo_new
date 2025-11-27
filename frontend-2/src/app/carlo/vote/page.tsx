@@ -4,11 +4,12 @@ import Swal from "sweetalert2";
 import HeaderCarlo from "@/components/HeaderCarlo";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import PosterAPI from "@/app/api/carlo/posters";
 import ResponsesAPI from "@/app/api/carlo/responses";
 import OTPAPI from "@/app/api/carlo/otp";
-// Component for the voting modal
+
+// Reusable VoteModal
 const VoteModal = ({
   isOpen,
   onClose,
@@ -24,27 +25,50 @@ const VoteModal = ({
   onSubmit: () => void;
   input: string;
   setInput: (value: string) => void;
-  mode: string;
+  mode: "phone" | "otp" | "name" | "unit";
 }) => {
-
-  
   if (!isOpen) return null;
+
+  const placeholder =
+    mode === "phone"
+      ? "ex. 628128231231"
+      : mode === "otp"
+      ? "ex. 123456"  
+      : mode == "unit" ? "ex. sirs" : "ex. Smith Lawson Junior";
+
+  const inputType = mode === "name" || mode == "unit" ? "text" : "number";
+
   return (
     <div className="fixed inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl p-6 w-full max-w-md border border-gray-200 shadow-xl">
-        <h2 className="text-2xl font-bold mb-4 text-gray-800">
-          Anda memilih {posterTitle}
-        </h2>
+        {mode == "name" ? (
+          <h2 className="text-2xl font-bold mb-4 text-gray-800">
+            Masukkan Nama Anda
+          </h2>
+          
+        ) : mode == "unit" ? (
+          <h2 className="text-2xl font-bold mb-4 text-gray-800">
+            Masukkan Unit Anda
+          </h2>
+        ) : (
+<h2 className="text-2xl font-bold mb-4 text-gray-800">
+            Anda memilih {posterTitle}
+          </h2>)
+        }
+
         <p className="text-gray-600 mb-6">
-  {mode === "phone" 
-    ? "Silakan masukkan nomor telepon Anda" 
-    : "Silakan masukkan kode OTP yang telah dikirim"}
-</p>        
+          {mode === "phone"
+            ? "Silakan masukkan nomor telepon Anda"
+            : mode === "otp"
+            ? "Silakan masukkan kode OTP yang telah dikirim"
+            : "Silakan masukkan nama Anda"}
+        </p>
+
         <input
-          type="number"
+          type={inputType}
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder={mode === "phone" ? "ex. 628128231231" : "ex. 212314"}
+          placeholder={placeholder}
           className="w-full p-3 rounded-xl mb-6 bg-gray-50 border border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         />
         <div className="flex gap-4">
@@ -71,15 +95,87 @@ const VoteModal = ({
   );
 };
 
+// Role selection modal
+const RadioSelectModal = ({
+  isOpen,
+  onClose,
+  onSubmit,
+  role,
+  setRole,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: () => void;
+  role: string;
+  setRole: (value: string) => void;
+}) => {
+  if (!isOpen) return null;
 
+  return (
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl p-6 w-full max-w-md border border-gray-200 shadow-xl">
+        <h2 className="text-2xl font-bold mb-4 text-gray-800 text-center">
+          Pilih Jenis Pemilih
+        </h2>
 
-// Component for the image modal
+        <p className="text-gray-600 mb-6 text-center">
+          Silakan pilih apakah Anda Karyawan atau Pengunjung
+        </p>
+
+        <div className="space-y-4">
+          <label className="flex items-center gap-3 p-3 border rounded-xl cursor-pointer hover:bg-gray-50 transition">
+            <input
+              type="radio"
+              value="karyawan"
+              checked={role === "karyawan"}
+              onChange={() => setRole("karyawan")}
+              className="w-5 h-5"
+            />
+            <span className="text-gray-800 font-medium">Karyawan</span>
+          </label>
+
+          <label className="flex items-center gap-3 p-3 border rounded-xl cursor-pointer hover:bg-gray-50 transition">
+            <input
+              type="radio"
+              value="pengunjung"
+              checked={role === "pengunjung"}
+              onChange={() => setRole("pengunjung")}
+              className="w-5 h-5"
+            />
+            <span className="text-gray-800 font-medium">Pengunjung</span>
+          </label>
+        </div>
+
+        <div className="flex gap-4 mt-8">
+          <button
+            onClick={onClose}
+            className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 px-4 rounded-xl transition"
+          >
+            Batal
+          </button>
+          <button
+            onClick={onSubmit}
+            disabled={!role}
+            className={`flex-1 py-3 px-4 rounded-xl transition ${
+              role
+                ? "bg-blue-500 hover:bg-blue-600 text-white"
+                : "bg-gray-500 cursor-not-allowed text-gray-300"
+            }`}
+          >
+            Lanjut
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Image modal
 const ImageModal = ({
   isOpen,
   onClose,
   imageUrl,
   title,
-  
 }: {
   isOpen: boolean;
   onClose: () => void;
@@ -142,172 +238,343 @@ const ImageModal = ({
 
 export default function Vote() {
   type Poster = {
-  id: number;
-  title: string;
-  imageUrl: string;
-  description: string;
-  votes: number;
-};
+    id: number;
+    title: string;
+    imageUrl: string;
+    description: string;
+    votes: number;
+  };
 
-const [posters, setPosters] = useState<Poster[]>([]);
+  const [posters, setPosters] = useState<Poster[]>([]);
 
+  // Form data
+  const [roles, setRoles] = useState<string>("");
+  const [name, setName] = useState<string>("");
+  const [phoneNumber, setPhoneNumber] = useState<string>("");
+  const [otp, setOtp] = useState<string>("");
+  const [unit,setUnit] = useState<string>("");
+  // Modal / flow states
+  const [isRoleModalOpen, setIsRoleModalOpen] = useState(false);
+  const [isNameModalOpen, setIsNameModalOpen] = useState(false);
+  const [isPhoneModalOpen, setIsPhoneModalOpen] = useState(false);
+  const [isOtpModalOpen, setIsOtpModalOpen] = useState(false);
+  const [isUnitModalOpen, setIsUnitModalOpen] = useState(false);
 
-  const router = useRouter();
+  const [expiry, setExpiry] = useState<string>("");
   const [selectedPoster, setSelectedPoster] = useState<{
     id: number;
     title: string;
   } | null>(null);
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [otp, setOtp] = useState("");
-  const [inputOtp, setInputOtp] = useState<boolean>(false);
-  const [expiry, setExpiry] = useState<string>("");
   const [selectedImage, setSelectedImage] = useState<{
     url: string;
     title: string;
   } | null>(null);
 
+  const router = useRouter();
+
   useEffect(() => {
-  const fetchPosters = async () => {
-    try {
-      const response = await PosterAPI.getPosters();
-      
-      setPosters(response);
-      console.log("DATA",response);
-    } catch (error) {
-      console.error("Error fetching posters:", error);
-    }
-  };
-  fetchPosters();
-}, []);
-
-
-  const handleSubmitVote = async () => {
-    try {
-      if (phoneNumber && selectedPoster) {
-      // Here you can add phone number validation if needed
-      if(!phoneNumber.startsWith("62")){
-        Swal.fire({
-          icon: 'warning',
-          title: 'Warning',
-          text: 'Nomor Telepon Harus Dimulai Dengan 62',
-        })
-        return;
+    const fetchPosters = async () => {
+      try {
+        const response = await PosterAPI.getPosters();
+        setPosters(response);
+        console.log("DATA", response);
+      } catch (error) {
+        console.error("Error fetching posters:", error);
       }
-      else{
-          console.log("Phone number:", phoneNumber);
-      console.log("Selected poster:", selectedPoster);
+    };
+    fetchPosters();
+  }, []);
 
-      const response = await ResponsesAPI.confirmNumber(phoneNumber);
-      console.log("Response:", response); 
-      if(response.success == true){
-        if(response.data.authorized == true){
-            const data = response.data;
-            Swal.fire({
-              icon: 'success',
-              title: 'Success',
-              text: 'Nomor Telepon Berhasil Di verifikasi',
-              showConfirmButton: true,
-              allowOutsideClick: false
-            }).then((result) => {
-              if (result.isConfirmed) {
-                router.push(`/carlo/${data.phone_number}-${data.otp}`);
-              }
-            })
-        }
-        else{
-
-
-        const otp = await OTPAPI.sendOTP(phoneNumber);
-        setExpiry(otp.data.otpExpiry);
-
-        console.log("OTP RESP", otp);
-          Swal.fire({
-              icon: 'success',
-              title: 'Success',
-              text: 'Anda Berhasil Memilih Poster',
-              showConfirmButton: true,
-              allowOutsideClick: false
-            }).then((result) => {
-              if (result.isConfirmed) {
-                setInputOtp(true);
-              }
-            })
-        }
-       
-      } 
-      }
-    }
-    } catch (error: any) {
-        const backendMsg =
-    error.response?.data?.message ||
-    error.response?.data?.error ||
-    "Terjadi kesalahan tidak diketahui";
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: `${backendMsg}`,
-          showConfirmButton: true,
-          allowOutsideClick: false
-        })
-    }
-    
+  // When user clicks "Pilih Poster Ini" -> set selected poster and open role modal
+  const handleSelectPoster = (poster: Poster) => {
+    setSelectedPoster({ id: poster.id, title: poster.title });
+    // reset flow fields (optional)
+    setRoles("");
+    setName("");
+    setUnit("");
+    setPhoneNumber("");
+    setOtp("");
+    // open role modal
+    setIsRoleModalOpen(true);
   };
 
-  const handleSubmitOtp =async  () => {
-    if (otp) {
-      console.log("OTP:", otp);
+  // Role modal submit -> decide next step
+  const handlePickRole = () => {
+    if (!roles) {
+      Swal.fire({
+        icon: "warning",
+        title: "Warning",
+        text: "Silakan pilih peran terlebih dahulu",
+      });
+      return;
+    }
 
-      const response = await OTPAPI.checkOTP({phone_number: phoneNumber, otp: otp, currentDate: new Date(), expiry: new Date()});
-      
-      console.log("OTP RESP", response);
+    setIsRoleModalOpen(false);
 
-      setInputOtp(false);
-      setPhoneNumber("");
-      setOtp("");
+    if (roles === "karyawan") {
+      setIsNameModalOpen(true);
+    } else {
+      // pengunjung
+      setIsPhoneModalOpen(true);
+    }
+  };
 
-      if(response.success){
-              if (!selectedPoster) {
+  // Name submit -> go to phone modal
+  const handleSubmitName = async () => {
+    try {
+      if (!name) {
         Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'Poster belum dipilih.',
+          icon: "warning",
+          title: "Warning",
+          text: "Nama tidak boleh kosong",
         });
         return;
       }
-                const voting = await PosterAPI.updateVoting(selectedPoster.id);
-        const updateChoice = await ResponsesAPI.update({phone_number: phoneNumber, choice: selectedPoster.id});
-        console.log("Voting:", voting,updateChoice);
-        console.log("OTP RESP", response);
-         Swal.fire({
-              icon: 'success',
-              title: 'Success',
-              text: 'Anda Berhasil Memilih Verifikasi OTP',
-              showConfirmButton: true,
-              allowOutsideClick: false
-            }).then((result) => {
-              if (result.isConfirmed) {
-        router.push(`/carlo/${phoneNumber}-${otp}`);
-              }
-            })
 
-      }
-      else{
+      Swal.fire({
+        icon: "success",
+        title: "Success",
+        text: "Anda Berhasil Input Nama",
+        showConfirmButton: true,
+        allowOutsideClick: false,
+      }).then((result) => {
+        if (result.isConfirmed) {
+          setIsNameModalOpen(false);
+          setIsUnitModalOpen(true);
+        }
+      });
+    } catch (error: any) {
+      const backendMsg =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        "Terjadi kesalahan tidak diketahui";
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: `${backendMsg}`,
+        showConfirmButton: true,
+        allowOutsideClick: false,
+      });
+    }
+  };
+
+  
+  // Name submit -> go to phone modal
+  const handleSubmitUnit = async () => {
+    try {
+      if (!unit) {
         Swal.fire({
-              icon: 'error',
-              title: 'Gagal Verifikasi OTP',
-              text: 'Apakah Ingin Kirim Ulang OTP Baru?',
-              showCancelButton: true,
-              confirmButtonText: "Save",
-              showConfirmButton: true,
-              allowOutsideClick: false
-            }).then((result) => {
-              if (result.isConfirmed) {
-                OTPAPI.sendOTP(phoneNumber);
-              }
-            })
+          icon: "warning",
+          title: "Warning",
+          text: "Unit tidak boleh kosong",
+        });
+        return;
       }
-      
 
+      Swal.fire({
+        icon: "success",
+        title: "Success",
+        text: "Anda Berhasil Input Unit",
+        showConfirmButton: true,
+        allowOutsideClick: false,
+      }).then((result) => {
+        if (result.isConfirmed) {
+          setIsUnitModalOpen(false);
+          setIsPhoneModalOpen(true);
+        }
+      });
+    } catch (error: any) {
+      const backendMsg =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        "Terjadi kesalahan tidak diketahui";
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: `${backendMsg}`,
+        showConfirmButton: true,
+        allowOutsideClick: false,
+      });
+    }
+  };
+
+
+  // Phone submit -> confirm number, send OTP if needed, then go to OTP modal
+  const handleSubmitPhone = async () => {
+    try {
+      if (!phoneNumber) {
+        Swal.fire({
+          icon: "warning",
+          title: "Warning",
+          text: "Nomor telepon tidak boleh kosong",
+        });
+        return;
+      }
+
+      if (!phoneNumber.startsWith("62")) {
+        Swal.fire({
+          icon: "warning",
+          title: "Warning",
+          text: "Nomor Telepon Harus Dimulai Dengan 62",
+        });
+        return;
+      }
+
+      // keep UI tidy
+      setIsPhoneModalOpen(false);
+
+      // Confirm number with backend
+      const response = await ResponsesAPI.confirmNumber(phoneNumber,name,roles,unit);
+      console.log("Response:", response);
+
+      if (response.success === true) {
+        if (response.data.authorized === true) {
+          const data = response.data;
+          Swal.fire({
+            icon: "success",
+            title: "Success",
+            text: "Nomor Telepon Berhasil Di verifikasi",
+            showConfirmButton: true,
+            allowOutsideClick: false,
+          }).then((result) => {
+            if (result.isConfirmed) {
+              // If authorized, redirect immediately (no OTP)
+              router.push(`/carlo/${data.phone_number}-${data.otp}`);
+            }
+          });
+          return;
+        } else {
+          // send OTP for normal voting
+          const otpResp = await OTPAPI.sendOTP(phoneNumber);
+          setExpiry(otpResp.data?.otpExpiry || "");
+          console.log("OTP RESP", otpResp);
+
+          Swal.fire({
+            icon: "success",
+            title: "Success",
+            text: "Anda Berhasil Memilih Poster",
+            showConfirmButton: true,
+            allowOutsideClick: false,
+          }).then((result) => {
+            if (result.isConfirmed) {
+              setIsOtpModalOpen(true);
+            }
+          });
+        }
+      } else {
+        // backend returned not success
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: response?.message || "Gagal memverifikasi nomor",
+        });
+      }
+    } catch (error: any) {
+      // if we had closed phone modal earlier, re-open it so user can retry
+      setIsPhoneModalOpen(true);
+
+      const backendMsg =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        "Terjadi kesalahan tidak diketahui";
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: `${backendMsg}`,
+        showConfirmButton: true,
+        allowOutsideClick: false,
+      });
+    }
+  };
+
+  // OTP submit -> verify, update voting, redirect
+  const handleSubmitOtp = async () => {
+    try {
+      if (!otp) {
+        Swal.fire({
+          icon: "warning",
+          title: "Warning",
+          text: "OTP tidak boleh kosong",
+        });
+        return;
+      }
+
+      // Verify OTP with backend
+      const response = await OTPAPI.checkOTP({
+        phone_number: phoneNumber,
+        otp: otp,
+        currentDate: new Date(),
+        expiry: new Date(),
+      });
+
+      console.log("OTP RESP", response);
+      setOtp("");
+
+      setIsOtpModalOpen(true);
+      // reset phone/otp fields to avoid reuse
+
+      if (response.success) {
+        if (!selectedPoster) {
+          Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: "Poster belum dipilih.",
+          });
+          return;
+        }
+
+        // Update voting and responses
+        const voting = await PosterAPI.updateVoting(selectedPoster.id);
+        const updateChoice = await ResponsesAPI.update({
+          phone_number: phoneNumber,
+          choice: selectedPoster.id,
+        });
+        console.log("Voting:", voting, updateChoice);
+
+        Swal.fire({
+          icon: "success",
+          title: "Success",
+          text: "Anda Berhasil Memilih Verifikasi OTP",
+          showConfirmButton: true,
+          allowOutsideClick: false,
+        }).then((result) => {
+          if (result.isConfirmed) {
+            router.push(`/carlo/${phoneNumber}-${otp}`);
+          }
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Gagal Verifikasi OTP",
+          text: "Apakah Ingin Kirim Ulang OTP Baru?",
+          showCancelButton: true,
+          confirmButtonText: "Kirim Ulang",
+          showConfirmButton: true,
+          allowOutsideClick: false,
+        }).then((result) => {
+          if (result.isConfirmed) {
+            OTPAPI.sendOTP(phoneNumber);
+            // reopen OTP modal so user can try again
+            setIsOtpModalOpen(true);
+          } else {
+            // user cancelled, maybe go back to phone modal
+            setIsPhoneModalOpen(true);
+          }
+        });
+      }
+    } catch (error: any) {
+      const backendMsg =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        "Terjadi kesalahan tidak diketahui";
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: `${backendMsg}`,
+        showConfirmButton: true,
+        allowOutsideClick: false,
+      });
+      setIsOtpModalOpen(true);
     }
   };
 
@@ -358,16 +625,12 @@ const [posters, setPosters] = useState<Poster[]>([]);
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        setSelectedPoster({
-                          id: poster.id,
-                          title: poster.title,
-                        });
+                        handleSelectPoster(poster);
                       }}
                       className=" w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg transition-colors duration-200 text-xl font-bold"
                     >
                       Pilih Poster Ini
                     </button>
-        
                   </div>
                 </div>
               </div>
@@ -376,25 +639,58 @@ const [posters, setPosters] = useState<Poster[]>([]);
         </div>
       </div>
 
+      {/* Role modal */}
+      <RadioSelectModal
+        isOpen={isRoleModalOpen}
+        onClose={() => {
+          setIsRoleModalOpen(false);
+          setSelectedPoster(null);
+          setRoles("");
+        }}
+        onSubmit={handlePickRole}
+        role={roles}
+        setRole={setRoles}
+      />
+
+      {/* Name modal (only for karyawan) */}
       <VoteModal
-        isOpen={!!selectedPoster}
-        onClose={() => setSelectedPoster(null)}
+        isOpen={isNameModalOpen}
+        onClose={() => setIsNameModalOpen(false)}
         posterTitle={selectedPoster?.title || ""}
-        onSubmit={handleSubmitVote}
+        onSubmit={handleSubmitName}
+        input={name}
+        setInput={setName}
+        mode="name"
+      />
+        <VoteModal
+        isOpen={isUnitModalOpen}
+        onClose={() => setIsUnitModalOpen(false)}
+        posterTitle={selectedPoster?.title || ""}
+        onSubmit={handleSubmitUnit}
+        input={unit}
+        setInput={setUnit}
+        mode="unit"
+      />
+      {/* Phone modal */}
+      <VoteModal
+        isOpen={isPhoneModalOpen}
+        onClose={() => setIsPhoneModalOpen(false)}
+        posterTitle={selectedPoster?.title || ""}
+        onSubmit={handleSubmitPhone}
         input={phoneNumber}
         setInput={setPhoneNumber}
         mode="phone"
       />
 
+      {/* OTP modal */}
       <VoteModal
-        isOpen={!!inputOtp}
-        onClose={() => setInputOtp(false)}
+        isOpen={isOtpModalOpen}
+        onClose={() => setIsOtpModalOpen(false)}
         posterTitle={selectedPoster?.title || ""}
         onSubmit={handleSubmitOtp}
         input={otp}
         setInput={setOtp}
-                mode="otp"
-
+        mode="otp"
       />
 
       <ImageModal
