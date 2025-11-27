@@ -60,7 +60,7 @@ const VoteModal = ({
           {mode === "phone"
             ? "Silakan masukkan nomor telepon Anda"
             : mode === "otp"
-            ? "Silakan masukkan kode OTP yang telah dikirim"
+            ? "Silakan cek WhatsApp Anda dan masukkan kode OTP 6 digit di bawah ini."
             : "Silakan masukkan nama Anda"}
         </p>
 
