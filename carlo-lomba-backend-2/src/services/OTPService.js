@@ -14,7 +14,7 @@ class OTPServiceClass {
 
         const data = await ResponsesModel.readByPhoneNumber(phone_number);
         console.log("DATA", data);
-        const updateResp = await ResponsesModel.updateById(data.response_id, {choice:data.choice, phone_number:phone_number, success: data.success, otp: otp, authorized: data.authorized});
+        const updateResp = await ResponsesModel.updateById(data.response_id, {choice:data.choice, phone_number:phone_number, success: data.success, otp: otp, authorized: data.authorized, expiry_date: otpExpiry, name: data.name, role: data.role, unit: data.unit});
         if (updateResp) {
             this.sendOTP(phone_number,otp);
             return {    
@@ -73,37 +73,57 @@ class OTPServiceClass {
 
         }
     
-        static async checkOTP(payload){
-            try {
-                if(payload.expiry > payload.currentDate){
-                    return {
-                        success: false,
-                        message: "OTP Expired, Please Generate New OTP"
-                    }
-                }
-                else{
-                const data = await ResponsesModel.readByPhoneNumber(payload.phone_number);
-                const update= await ResponsesModel.updateById(data.response_id, {choice:data.choice, phone_number:payload.phone_number, success: data.success, otp: payload.otp, authorized: true});
-                if (data.otp === payload.otp) {
-                    
-                    return {
-                        success: true,
-                        message: "OTP Valid"
-                    }
-                }
-                else{
-                       return {
-                        success: false,
-                        message: "OTP Invalid"
-                    }
-                }       
-                }
+      static async checkOTP(payload) {
+  try {
+    const data = await ResponsesModel.readByPhoneNumber(payload.phone_number);
 
-            } catch (error) {
-            console.error('Error Checking OTP:', error.message);
+    if (!data) {
+      return {
+        success: false,
+        message: "Phone number not found"
+      };
+    }
 
-            throw error;
-            }
-        }
+    // 1. Check expiry
+    if (data.expiry_date > payload.currentDate) {
+                console.log("OTP DATE: ", data.expiry_date,"CURR DATE: ", payload.currentDate);
+
+      return {
+        success: false,
+        message: "OTP expired, please generate a new OTP"
+      };
+    }
+
+    // 2. Check OTP validity
+    if (data.otp !== payload.otp) {
+      return {
+        success: false,
+        message: "OTP invalid"
+      };
+    }
+
+    // 3. Only update **after OTP validated**
+        await ResponsesModel.updateById(data.response_id, {
+            choice: data.choice,
+            phone_number: payload.phone_number,
+            otp: payload.otp,
+            authorized: true,
+            expiry_date: data.expiry_date,
+            success: false,
+            name: data.name,
+            role: data.role,
+            unit: data.unit
+        });
+    return {
+      success: true,
+      message: "OTP valid"
+    };
+
+  } catch (error) {
+    console.error("Error Checking OTP:", error.message);
+    throw error;
+  }
+}
+
 }
 module.exports = OTPServiceClass;
