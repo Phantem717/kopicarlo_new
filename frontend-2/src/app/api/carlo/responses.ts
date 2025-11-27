@@ -22,6 +22,19 @@ success: boolean,
 message: string
 }
 
+interface responseList {
+   id: number;
+    name: string;
+    phone_number: string;
+    unit: string;
+    role: string;
+    choice: number;
+    otp:string;
+    success: boolean;
+    authorized: boolean;
+}
+
+
 interface qrPayload {
   phone_number: string,
   otp: string
@@ -103,6 +116,27 @@ checkQR: async (payload:qrPayload): Promise<responseResult> => {
               };
     const response: AxiosResponse<responseResult> = await axios.post(
       `${BASE_URL}/api/responses/check_QR`, payload,{headers} 
+    );
+
+    return response.data; // now TS knows it's an array
+  } catch (error) {
+    console.error("Error fetching posters:", error);
+    throw error;
+  }
+},
+
+getResponses: async (): Promise<responseList[]> => {
+  try {
+      const { timestamp, signature } = generateSignature(CONS_ID, API_KEY);
+        
+              const headers = {
+                "Content-Type": "application/json",
+                "x-cons-id": CONS_ID,
+                "x-timestamp": timestamp,
+                "x-signature": signature,
+              };
+    const response: AxiosResponse<responseList[]> = await axios.get(
+      `${BASE_URL}/api/responses`, { headers }
     );
 
     return response.data; // now TS knows it's an array

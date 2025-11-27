@@ -421,11 +421,11 @@ export default function Vote() {
       }
 
       // keep UI tidy
-      setIsPhoneModalOpen(false);
 
       // Confirm number with backend
       const response = await ResponsesAPI.confirmNumber(phoneNumber,name,roles,unit);
       console.log("Response:", response);
+      setIsPhoneModalOpen(false);
 
       if (response.success === true) {
         if (response.data.authorized === true) {
@@ -471,7 +471,6 @@ export default function Vote() {
       }
     } catch (error: any) {
       // if we had closed phone modal earlier, re-open it so user can retry
-      setIsPhoneModalOpen(true);
 
       const backendMsg =
         error.response?.data?.message ||

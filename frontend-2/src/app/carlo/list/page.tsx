@@ -3,33 +3,16 @@
 import { useState, useEffect } from "react";
 import { LockOutlined, QrcodeOutlined } from "@ant-design/icons";
 import { Button, Modal, Input, Table, message, Card } from "antd";
-import { Html5Qrcode } from "html5-qrcode";
 import { useRouter } from "next/navigation";
 
-// // Dummy data for votes
-// const dummyVotes = [
-//   { id: 1, title: "Vote 1", description: "Deskripsi vote 1", status: "active" },
-//   {
-//     id: 2,
-//     title: "Vote 2",
-//     description: "Deskripsi vote 2",
-//     status: "completed",
-//   },
-//   {
-//     id: 3,
-//     title: "Vote 3",
-//     description: "Deskripsi vote 3",
-//     status: "upcoming",
-//   },
-// ];
 import PosterAPI from "@/app/api/carlo/posters";
+import ResponsesAPI from "@/app/api/carlo/responses";
 export default function VoteListPage() {
     const router = useRouter();
 
   const [password, setPassword] = useState("");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [scanner, setScanner] = useState<Html5Qrcode | null>(null);
+
   type Poster = {
     id: number;
     title: string;
@@ -38,13 +21,28 @@ export default function VoteListPage() {
     votes: number;
   };
 
+  type Responses = {
+    id: number;
+    name: string;
+    phone_number: string;
+    unit: string;
+    role: string;
+    choice: number;
+    otp:string;
+    success: boolean;
+    authorized: boolean;
+  }
+
   const [posters, setPosters] = useState<Poster[]>([]);
+  const [responses, setResponses] = useState<Responses[]>([]);
 
 
   const handleGetData = async () =>{
     const response = await PosterAPI.getPosters();
-    console.log("RESP",response)
+    const respData = await ResponsesAPI.getResponses();
+    console.log("RESP",response,respData);
     setPosters(response);
+    setResponses(respData);
   }
   // Check if user is already authenticated
   useEffect(() => {
@@ -69,59 +67,6 @@ export default function VoteListPage() {
     }
   };
 
-  const handleScan = async (decodedText: string) => {
-    try {
-      // Stop the scanner
-      if (scanner) {
-        await scanner.stop();
-        setIsModalVisible(false);
-      }
-
-      // Process the scanned QR code
-      message.success(`Kode QR berhasil dipindai: ${decodedText}`);
-      // Add your redemption logic here
-    } catch (error) {
-      console.error("Error handling scan:", error);
-      message.error("Gagal memproses kode QR");
-    }
-  };
-
-  const startScanner = async () => {
-    try {
-      const html5QrCode = new Html5Qrcode("qr-reader");
-      setScanner(html5QrCode);
-
-      const config = {
-        fps: 10,
-        qrbox: { width: 250, height: 250 },
-        aspectRatio: 1.0,
-      };
-
-      await html5QrCode.start(
-        { facingMode: "environment" },
-        config,
-        handleScan,
-        undefined
-      );
-
-      setIsModalVisible(true);
-    } catch (error) {
-      console.error("Error starting scanner:", error);
-      message.error("Tidak dapat mengakses kamera");
-    }
-  };
-
-  const stopScanner = async () => {
-    try {
-      if (scanner) {
-        await scanner.stop();
-        setScanner(null);
-      }
-      setIsModalVisible(false);
-    } catch (error) {
-      console.error("Error stopping scanner:", error);
-    }
-  };
 
   const columns = [
     {
@@ -151,6 +96,54 @@ export default function VoteListPage() {
         };
         return statusMap[status] || status;
       },
+    },
+  ];
+
+  const respColumns = [
+    {
+      title: "ID",
+      dataIndex: "id",
+      key: "id",
+    },
+    {
+      title: "Nama",
+      dataIndex: "name",
+      key: "name",
+    },
+    {
+      title: "Nomor Telepon",
+      dataIndex: "phone_number",
+      key: "phone_number",
+    },
+    {
+      title: "Unit",
+      dataIndex: "unit",
+      key: "unit",
+    },
+    {
+      title: "Role",
+      dataIndex: "role",
+      key: "role",
+    },
+    {
+      title: "Pilihan",
+      dataIndex: "choice",
+      key: "choice",
+    },
+    {
+      title: "OTP",
+      dataIndex: "otp",
+      key: "otp",
+    },
+    {
+      title: "Status",
+      dataIndex: "success",
+      key: "success",
+    },
+    {
+      title: "Authorized",
+      dataIndex: "authorized",
+      key: "authorized",
     },
   ];
 
@@ -186,8 +179,8 @@ export default function VoteListPage() {
   }
 
   return (
-    <div className="p-4">
-      <div className="flex justify-between items-center mb-6">
+    <div className="p-4 gap-8">
+      <div className="flex justify-between items-center mb-6 ">
         <h1 className="text-2xl font-bold">Daftar Voting</h1>
         <Button type="primary" icon={<QrcodeOutlined />} onClick={() => router.push("/carlo/qr")}>
           Scan QR Code
@@ -200,23 +193,17 @@ export default function VoteListPage() {
         rowKey="id"
         pagination={false}
       />
+      <div>
+                <h1 className="text-2xl font-bold mt-10">Daftar Responses</h1>
 
-      <Modal
-        title="Scan QR Code"
-        open={isModalVisible}
-        onCancel={stopScanner}
-        footer={[
-          <Button key="close" onClick={stopScanner}>
-            Tutup
-          </Button>,
-        ]}
-        width={400}
-      >
-        <div id="qr-reader" className="w-full h-64"></div>
-        <p className="text-center mt-2 text-gray-600">
-          Arahkan kamera ke QR Code
-        </p>
-      </Modal>
+  <Table
+        dataSource={responses}
+        columns={respColumns}
+        rowKey="id"
+        pagination={{ pageSize: 8 }}
+      />
+      </div>
+    
     </div>
   );
 }

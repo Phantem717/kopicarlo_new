@@ -25,7 +25,8 @@ const queries = [
     authorized BOOLEAN DEFAULT 0,
     otp varchar(255),
     date_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    expiry_date TIMESTAMP
+    expiry_date varchar(255),
+    unit varchar(255)
   );`,
 
 ];
