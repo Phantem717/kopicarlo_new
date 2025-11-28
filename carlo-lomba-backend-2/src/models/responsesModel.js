@@ -1,12 +1,13 @@
 const { getDb } = require('../config/db');
-
+const {getCurrentTimestamp} = require('../handlers/timestamp')
 class ResponsesModel {
   static async create(phone_number,name,role,unit) {
     const pool = await getDb();
     const conn = await pool.getConnection();
     try {
-          const query = 'INSERT INTO responses (phone_number, name, role,unit) VALUES (?,?,?,?)';
-    const [result] = await conn.query(query, [phone_number,name,role,unit]);
+          const query = 'INSERT INTO responses (phone_number, name, role,unit,date_created) VALUES (?,?,?,?,?)';
+          const timestamp= getCurrentTimestamp();
+    const [result] = await conn.query(query, [phone_number,name,role,unit,timestamp]);
     return result;
     } catch (error) {
       throw error
@@ -140,7 +141,7 @@ class ResponsesModel {
               COUNT(CASE WHEN success = 0 AND authorized = 1 THEN 1 END) AS total_authorized,
               COUNT(CASE WHEN success = 0 AND authorized = 0 THEN 1 END) AS total_not_authorized
           FROM responses
-          WHERE DATE(date_created) = CURDATE();
+          WHERE DATE(date_created) = CURRENT_DATE;
 
         `;
           const [rows] = await conn.query(query);
