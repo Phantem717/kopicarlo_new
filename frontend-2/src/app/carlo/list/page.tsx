@@ -4,9 +4,17 @@ import { useState, useEffect } from "react";
 import { LockOutlined, QrcodeOutlined } from "@ant-design/icons";
 import { Button, Modal, Input, Table, message, Card } from "antd";
 import { useRouter } from "next/navigation";
-
+import {ExportPosterToExcel,
+  ExportResponsesToExcel} from "@/utils/exportExcel"
 import PosterAPI from "@/app/api/carlo/posters";
 import ResponsesAPI from "@/app/api/carlo/responses";
+import dayjs from 'dayjs';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+dayjs.extend(utc);
+dayjs.extend(timezone);
+dayjs.extend(customParseFormat);
 export default function VoteListPage() {
     const router = useRouter();
 
@@ -31,6 +39,7 @@ export default function VoteListPage() {
     otp:string;
     success: boolean;
     authorized: boolean;
+    date_created: string;
   }
 
   const [posters, setPosters] = useState<Poster[]>([]);
@@ -40,9 +49,14 @@ export default function VoteListPage() {
   const handleGetData = async () =>{
     const response = await PosterAPI.getPosters();
     const respData = await ResponsesAPI.getResponses();
+
+    const newRespData = respData.map((item) => ({
+      ...item,
+      date_created: dayjs(item.date_created, "YYYY-MM-DD HH:mm:ss").tz('Asia/Jakarta').format("DD/MM/YYYY, HH.mm.ss"),
+    }))
     console.log("RESP",response,respData);
     setPosters(response);
-    setResponses(respData);
+    setResponses(newRespData);
   }
   // Check if user is already authenticated
   useEffect(() => {
@@ -145,6 +159,12 @@ export default function VoteListPage() {
       dataIndex: "authorized",
       key: "authorized",
     },
+    {
+      title: "Tanggal Dibuat",
+      dataIndex: "date_created",
+      key: "date_created",
+
+    },
   ];
 
   if (!isAuthenticated) {
@@ -182,11 +202,16 @@ export default function VoteListPage() {
     <div className="p-4 gap-8">
       <div className="flex justify-between items-center mb-6 ">
         <h1 className="text-2xl font-bold">Daftar Voting</h1>
+
         <Button type="primary" icon={<QrcodeOutlined />} onClick={() => router.push("/carlo/qr")}>
           Scan QR Code
         </Button>
       </div>
+      <div>
+        <Button color="green" variant="solid" size="large" className="mr-4 font-bold" onClick={()=>ExportPosterToExcel(posters)}>Export Poster To Excel</Button> 
+        <Button color="green" variant="solid" size="large" className="mr-4 font-bold" onClick={()=>ExportResponsesToExcel(responses)}>Export Responses To Excel</Button>
 
+      </div>
       <Table
         dataSource={posters}
         columns={columns}

@@ -22,7 +22,7 @@ class ResponsesModel {
     const conn = await pool.getConnection();
 
     try {
-       const query = 'SELECT response_id as `id`, phone_number, name, role, unit, otp, success,authorized,choice FROM responses';
+       const query = 'SELECT response_id as `id`, phone_number, name, role, unit, otp, success,authorized,choice,date_created FROM responses';
     const [rows] = await conn.query(query);
     return rows;
     } catch (error) {

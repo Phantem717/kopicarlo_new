@@ -44,9 +44,26 @@ const handleClick =async (decodedText: string) => {
   useEffect(() => {
     generateQR(code, "qrcode");
   }, [code]);
+
+const confirmRedeem = () => {
+  Swal.fire({
+    title: "WARNING!",
+    text: "Pastikan tombol Redeem HANYA diaktifkan oleh Petugas",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Ya, Redeem",
+    cancelButtonText: "Batal"
+  }).then((result) => {
+    if (result.isConfirmed) {
+      handleClick(lastPart!);
+    }
+  });
+};
+
 useEffect(() => {
   let hasTriggered = false; 
   let interval: any = null;
+
 
   async function check() {
     if (hasTriggered) return;
@@ -86,15 +103,16 @@ useEffect(() => {
           <h1 className="text-3xl font-bold text-center mb-8 text-gray-800">
             Terima Kasih Telah Melakukan Voting
           </h1>
-          <p className="text-center my-8">
-            Silahkan Tunjukan QR Code Ini Ke Petugas
+          <p className="text-center my-8 font-bold text-xl uppercase">
+            Silahkan tunjukkan voucher ini ke petugas untuk mendapatkan kopi Anda
           </p>
-          <div className="flex justify-center">
+          <div className="flex justify-center flex-col items-center">
             <canvas id="qrcode" />
-            
+                        <h6 className="text-center my-8  text-lg uppercase">{code}</h6>
+
           </div>
             <button
-            onClick={() => handleClick(lastPart!)}
+            onClick={confirmRedeem}
             className={`flex-1 py-3 px-4 w-full rounded-xl mt-4 transition-colors ${
                 "bg-blue-500 hover:bg-blue-600 text-white"
             }`}
