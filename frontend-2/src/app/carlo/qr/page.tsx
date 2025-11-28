@@ -5,7 +5,6 @@ import { useSearchParams } from "next/navigation";
 import Swal from "sweetalert2";
 import { Button, Card, Tabs, message } from "antd";
 import { QrcodeOutlined, CameraOutlined } from "@ant-design/icons";
-import { usePathname } from "next/navigation";
 
 // Dynamically import QR code generator
 const generateQR = async (text: string, elementId: string) => {
