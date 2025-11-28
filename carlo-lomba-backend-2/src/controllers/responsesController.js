@@ -128,7 +128,21 @@ static async confirmPhoneNumber(req, res) {
   try {
     const {phone_number,name,role,unit} = req.body; //phone_number = req.body;
     console.log("Phone number:", phone_number);
-  
+  const CURRENT_DATE = new Date();
+  const CURRENT_WIB = new Date(CURRENT_DATE.getTime() + 7 * 60 * 60 * 1000);
+
+const EXPIRY_DATE = new Date("2025-12-02T23:59:00Z");
+console.log("DATES",CURRENT_WIB,EXPIRY_DATE);
+if (CURRENT_WIB > EXPIRY_DATE) {
+  return res.status(400).json({
+    error: "Date expired",
+    data: null,
+    success: false,
+    message: "Date expired",
+  });
+}
+
+
     const result = await ResponsesModel.readByPhoneNumber(phone_number);
     console.log("RESULT", result);
     if (!result) {
