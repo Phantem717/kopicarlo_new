@@ -81,6 +81,23 @@ class ResponsesModel {
 
   }
 
+      static async readByEmail(email) {
+    const pool = await getDb();
+    const conn = await pool.getConnection();
+
+    try {
+          const query = 'SELECT * FROM responses WHERE email = ?';
+    const [rows] = await conn.query(query, [email]);
+    return rows[0];
+    } catch (error) {
+      throw error
+    }finally{
+      conn.release();
+    }
+
+  }
+
+
   static async updateById(id, data) {
     const conn = await getDb();
     const query = 'UPDATE responses SET choice = ?, phone_number = ?, success = ?, otp = ?, authorized=?,expiry_date=?, name=?, role=?, unit=?  WHERE response_id = ?';

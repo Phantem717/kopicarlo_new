@@ -142,7 +142,6 @@ if (CURRENT_WIB > EXPIRY_DATE) {
   });
 }
 
-
     const result = await ResponsesModel.readByPhoneNumber(phone_number);
     console.log("RESULT", result);
     if (!result) {

@@ -19,6 +19,7 @@ const queries = [
     response_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     choice integer,
     phone_number VARCHAR(255),
+    email VARCHAR(255),
     name VARCHAR(255),
     role VARCHAR(255),
     success BOOLEAN DEFAULT 0,

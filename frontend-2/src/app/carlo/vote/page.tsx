@@ -25,7 +25,7 @@ const VoteModal = ({
   onSubmit: () => void;
   input: string;
   setInput: (value: string) => void;
-  mode: "phone" | "otp" | "name" | "unit";
+  mode: "phone" | "otp" | "name" | "unit" | "email";
 }) => {
   if (!isOpen) return null;
 
@@ -34,9 +34,9 @@ const VoteModal = ({
       ? "ex. 628128231231"
       : mode === "otp"
       ? "ex. 123456"  
-      : mode == "unit" ? "ex. sirs" : "ex. Smith Lawson Junior";
+      : mode == "unit" ? "ex. sirs" : mode == "name" ? "ex. John Doe" : "alexzebes@gmail.com";
 
-  const inputType = mode === "name" || mode == "unit" ? "text" : "number";
+  const inputType = mode === "name" || mode == "unit" || mode == "email" ? "text" : "number";
 
   return (
     <div className="fixed inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -61,7 +61,7 @@ const VoteModal = ({
             ? "Silakan masukkan nomor telepon Anda"
             : mode === "otp"
             ? "Silakan cek WhatsApp Anda dan masukkan kode OTP 6 digit di bawah ini."
-            : "Silakan masukkan nama Anda"}
+            : mode == "name" ? "Silakan masukkan nama Anda" : "Silakan masukkan email Anda"}
         </p>
 
         <input
@@ -250,11 +250,15 @@ export default function Vote() {
   // Form data
   const [roles, setRoles] = useState<string>("");
   const [name, setName] = useState<string>("");
+    const [email, setEmail] = useState<string>("");
+
   const [phoneNumber, setPhoneNumber] = useState<string>("");
   const [otp, setOtp] = useState<string>("");
   const [unit,setUnit] = useState<string>("");
   // Modal / flow states
   const [isRoleModalOpen, setIsRoleModalOpen] = useState(false);
+    const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
+
   const [isNameModalOpen, setIsNameModalOpen] = useState(false);
   const [isPhoneModalOpen, setIsPhoneModalOpen] = useState(false);
   const [isOtpModalOpen, setIsOtpModalOpen] = useState(false);
@@ -360,6 +364,46 @@ export default function Vote() {
 
   
   // Name submit -> go to phone modal
+  const handleSubmitEmail = async () => {
+    try {
+      if (!email) {
+        Swal.fire({
+          icon: "warning",
+          title: "Warning",
+          text: "Email tidak boleh kosong",
+        });
+        return;
+      }
+
+      Swal.fire({
+        icon: "success",
+        title: "Success",
+        text: "Anda Berhasil Input Email",
+        showConfirmButton: true,
+        allowOutsideClick: false,
+      }).then((result) => {
+        if (result.isConfirmed) {
+          setIsEmailModalOpen(false);
+          setIsPhoneModalOpen(true);
+        }
+      });
+    } catch (error: any) {
+      const backendMsg =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        "Terjadi kesalahan tidak diketahui";
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: `${backendMsg}`,
+        showConfirmButton: true,
+        allowOutsideClick: false,
+      });
+    }
+  };
+
+  
+  // Name submit -> go to phone modal
   const handleSubmitUnit = async () => {
     try {
       if (!unit) {
@@ -380,7 +424,7 @@ export default function Vote() {
       }).then((result) => {
         if (result.isConfirmed) {
           setIsUnitModalOpen(false);
-          setIsPhoneModalOpen(true);
+          setIsEmailModalOpen(true);
         }
       });
     } catch (error: any) {
@@ -669,6 +713,16 @@ export default function Vote() {
         input={unit}
         setInput={setUnit}
         mode="unit"
+      />
+
+         <VoteModal
+        isOpen={isEmailModalOpen}
+        onClose={() => setIsEmailModalOpen(false)}
+        posterTitle={selectedPoster?.title || ""}
+        onSubmit={handleSubmitEmail}
+        input={email}
+        setInput={setEmail}
+        mode="email"
       />
       {/* Phone modal */}
       <VoteModal
