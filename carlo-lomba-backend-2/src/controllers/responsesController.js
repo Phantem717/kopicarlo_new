@@ -149,7 +149,7 @@ if (CURRENT_WIB > EXPIRY_DATE) {
       const totalResp = await ResponsesModel.countResponses();
       console.log("TOTAL",totalResp[0].total);
 
-      if(totalResp[0].total >= 400){
+      if(totalResp[0].total >= 1000){
         return res.status(400).json({
           error: "Total Responses Exceeded",
           data: result,
