@@ -225,7 +225,7 @@ export default function VoteListPage() {
         dataSource={responses}
         columns={respColumns}
         rowKey="id"
-        pagination={{ pageSize: 8 }}
+        pagination={{ pageSize: 100 }}
       />
       </div>
     
