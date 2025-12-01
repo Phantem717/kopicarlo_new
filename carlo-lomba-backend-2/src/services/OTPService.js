@@ -15,14 +15,14 @@ class OTPServiceClass {
         const data = await ResponsesModel.readByPhoneNumber(phone_number);
         console.log("DATA", data);
         const updateResp = await ResponsesModel.updateById(data.response_id, {choice:data.choice, phone_number:phone_number, success: data.success, otp: otp, authorized: data.authorized, expiry_date: otpExpiry, name: data.name, role: data.role, unit: data.unit});
-        if (updateResp) {
-            this.sendOTP(phone_number,otp);
-            return {    
-                otp: otp,
-                otpExpiry: otpExpiry,
-                phone_number: phone_number
-            };
-        }
+        // if (updateResp) {
+        //     this.sendOTP(phone_number,otp);
+        //     return {    
+        //         otp: otp,
+        //         otpExpiry: otpExpiry,
+        //         phone_number: phone_number
+        //     };
+        // }
         } catch (error) {
             console.error('Error Generating OTP:', error.message);
             throw error;

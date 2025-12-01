@@ -144,7 +144,7 @@ if (CURRENT_WIB > EXPIRY_DATE) {
 
 
     const result = await ResponsesModel.readByPhoneNumber(phone_number);
-    console.log("RESULT", result);
+    console.log("RESULT_PHONE", result);
     if (!result) {
       const totalResp = await ResponsesModel.countResponses();
       console.log("TOTAL",totalResp[0].total);
@@ -217,7 +217,7 @@ static async confirmQR(req,res){
     const payload = req.body; //phone_number = req.body;
 
     const result = await ResponsesModel.readByPhoneNumber(payload.phone_number);
-    console.log("RESULT", result,payload);
+    console.log("RESULT_PHONE3", result,payload);
     if(!result.success){
  if(result.otp === payload.otp){
              const new_payload = {
