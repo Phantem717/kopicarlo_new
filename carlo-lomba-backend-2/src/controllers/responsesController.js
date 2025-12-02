@@ -131,7 +131,7 @@ static async confirmPhoneNumber(req, res) {
   const CURRENT_DATE = new Date();
   const CURRENT_WIB = new Date(CURRENT_DATE.getTime() + 7 * 60 * 60 * 1000);
 
-const EXPIRY_DATE = new Date("2025-12-02T23:59:00Z");
+const EXPIRY_DATE = new Date("2025-12-02T11:00:00Z");
 console.log("DATES",CURRENT_WIB,EXPIRY_DATE);
 if (CURRENT_WIB > EXPIRY_DATE) {
   return res.status(400).json({
@@ -149,7 +149,7 @@ if (CURRENT_WIB > EXPIRY_DATE) {
       const totalResp = await ResponsesModel.countResponses();
       console.log("TOTAL",totalResp[0].total);
 
-      if(totalResp[0].total >= 1000){
+      if(totalResp[0].total >= 1500){
         return res.status(400).json({
           error: "Total Responses Exceeded",
           data: result,
